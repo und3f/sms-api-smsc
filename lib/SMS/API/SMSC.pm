@@ -1,3 +1,4 @@
+# It is dirty rework of original smsc.ru library. Now it has object interface.
 package SMS::API::SMSC;
 
 use strict;
