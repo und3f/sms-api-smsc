@@ -1,0 +1,118 @@
+=encoding utf8
+
+=head1 NAME
+
+SMS::API::SMSC - send SMS with smsc.ru
+
+=head1 SYNOPSIS
+
+    use SMS::API::SMSC;
+
+    my $sms = SMS::API::SMSC->new(login => '<login>', password => '<password>');
+
+    my ($sms_id, $sms_cnt, $cost, $balance) =
+      $sms->send("79999999999", "Ваш пароль: 123", translit => 1);
+
+    my ($sms_id, $sms_cnt, $cost, $balance) =
+      $sms->send("79999999999", "http://smsc.ru\nSMSC.RU",
+        query => "maxsms=3");
+
+    my ($sms_id, $sms_cnt, $cost, $balance) = $sms->send(
+        "79999999999",
+        "0605040B8423F0DC0601AE02056A0045C60C037761702E736D73632E72752F0001037761702E736D73632E7275000101",
+        format => 5
+    );
+
+    my ($sms_id, $sms_cnt, $cost, $balance) =
+      $sms->send("79999999999", "", format => 3);
+
+    my ($cost, $sms_cnt) = $sms->get_cost("79999999999",
+        "Вы успешно зарегистрированы!");
+
+    my ($status, $args{time}) = $sms->get_status($sms_id, "79999999999");
+
+    my $balance = $sms->get_balance();
+
+=head1 METHODS
+
+The following method are available
+
+=over
+
+=item $sms->send($phones, $message, %args);
+
+Функция отправки SMS.
+
+Обязательные параметры:
+
+$phones - список телефонов через запятую или точку с запятой
+$message - отправляемое сообщение
+
+необязательные параметры:
+
+$args{translit} - переводить или нет в транслит (1,2 или 0)
+$args{time} - необходимое время доставки в виде строки (DDMMYYhhmm, h1-h2, 0ts, +m)
+$args{id} - идентификатор сообщения. Представляет собой 32-битное число в диапазоне от 1 до 2147483647.
+$args{format} - формат сообщения (0 - обычное sms, 1 - flash-sms, 2 - wap-push, 3 - hlr, 4 - bin, 5 - bin-hex, 6 - ping-sms)
+$args{sender} - имя отправителя (Sender ID). Для отключения Sender ID по умолчанию необходимо в качестве имени
+передать пустую строку или точку.
+$args{query} - строка дополнительных параметров, добавляемая в URL-запрос ("valid=01:00&maxsms=3")
+
+возвращает массив (<id>, <количество sms>, <стоимость>, <баланс>) в случае успешной отправки
+либо массив (<id>, -<код ошибки>) в случае ошибки
+
+=item $sms->get_cost($phones, $message, %args);
+
+
+Функция получения стоимости SMS
+
+обязательные параметры:
+
+$phones - список телефонов через запятую или точку с запятой
+$message - отправляемое сообщение
+
+необязательные параметры:
+
+$args{translit} - переводить или нет в транслит (1,2 или 0)
+$args{format} - формат сообщения (0 - обычное sms, 1 - flash-sms, 2 - wap-push, 3 - hlr, 4 - bin, 5 - bin-hex, 6 - ping-sms)
+$args{sender} - имя отправителя (Sender ID)
+$args{query} - строка дополнительных параметров, добавляемая в URL-запрос ("list=79999999999:Ваш пароль: 123\n78888888888:Ваш пароль: 456")
+
+возвращает массив (<стоимость>, <количество sms>) либо массив (0, -<код ошибки>) в случае ошибки
+
+=item $sms->get_status($id, $phone);
+
+Функция проверки статуса отправленного SMS или HLR-запроса
+
+$id - ID cообщения
+$phone - номер телефона
+
+возвращает массив:
+для отправленного SMS (<статус>, <время изменения>, <код ошибки sms>)
+для HLR-запроса (<статус>, <время изменения>, <код ошибки sms>, <код страны регистрации>, <код оператора абонента>,
+<название страны регистрации>, <название оператора абонента>, <название роуминговой страны>, <название роумингового оператора>,
+<код IMSI SIM-карты>, <номер сервис-центра>)
+либо массив (0, -<код ошибки>) в случае ошибки
+
+=item $sms->get_balance;
+
+Функция получения баланса
+
+без параметров
+
+возвращает баланс в виде строки или undef в случае ошибки
+
+=back
+
+=head1 SEE ALSO
+
+Original library L<http://smsc.ru/api/perl/>
+
+=head1 COPYRIGHT
+
+Copyright 2012 Sergey Zasenko.
+
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+Based on original smsc.ru library smsc.ru/api/perl
